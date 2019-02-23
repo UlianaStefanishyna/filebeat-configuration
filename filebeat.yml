@@ -1,0 +1,36 @@
+filebeat.prospectors:
+- type: log
+  enabled: true
+  paths:
+  - /path/to/logs/*/*.log
+
+
+processors:
+- drop_fields:
+   fields: ["offset","_score","_version","beat", "prospector", "input"]
+- rename:
+   fields:
+    - from: "host.name"
+      to: "hostname"
+
+
+setup.kibana:
+  host: "web.kibana.marathon.l4lb.thisdcos.directory:80"
+
+
+output.elasticsearch:
+  hosts: ["coordinator.elastic.l4lb.thisdcos.directory:9200"]
+  indices:
+   - index: "error"
+     when.contains:
+      message: "ERROR"
+setup.template:
+  name: 'error-logs'
+  pattern: 'errors-*'
+  enabled: true
+
+
+logging.level: error
+
+
+logging.selectors: ["*"]
